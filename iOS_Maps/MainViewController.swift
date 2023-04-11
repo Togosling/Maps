@@ -30,7 +30,52 @@ class MainViewController: UIViewController {
         setupViews()
         setNewRegion()
         setAnnotationsForMap()
+        performLocalSerch()
         
+    }
+    
+    fileprivate func performLocalSerch() {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = "Apple"
+        request.region = mapView.region
+        let localSearch = MKLocalSearch(request: request)
+        localSearch.start { resp, err in
+            if let err = err {
+                print("Failed", err)
+                return
+            }
+            resp?.mapItems.forEach({ mapItem in
+                
+                let placeMark = mapItem.placemark
+                var address = ""
+                if placeMark.subThoroughfare != nil {
+                    address = placeMark.subThoroughfare! + " "
+                }
+                if placeMark.thoroughfare != nil {
+                    address = placeMark.thoroughfare! + " "
+                }
+                if placeMark.postalCode != nil {
+                    address = placeMark.postalCode! + " "
+                }
+                if placeMark.locality != nil {
+                    address = placeMark.locality! + " "
+                }
+                if placeMark.administrativeArea != nil {
+                    address = placeMark.administrativeArea! + " "
+                }
+                if placeMark.country != nil {
+                    address = placeMark.country! + " "
+                }
+                print(address)
+                
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = mapItem.placemark.coordinate
+                annotation.title = mapItem.name
+                self.mapView.addAnnotation(annotation)
+            })
+            self.mapView.showAnnotations(self.mapView.annotations, animated: true)
+
+        }
     }
     
     fileprivate func setAnnotationsForMap() {
